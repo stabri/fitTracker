@@ -1,0 +1,21 @@
+<section class="signu-form">
+  <form fxLayout="column" fxLayoutAlign="center center" fxLayoutGap="12px" #f="ngForm" (ngSubmit)="onSubmit(f)">
+    <mat-form-field>
+      <input type="email" matInput placeholder="Your email" ngModel name="email" email required>
+      <mat-error>Email is invalid</mat-error>
+      <mat-error>Field must not be empty</mat-error>
+    </mat-form-field>
+    <mat-form-field hintLabel="Should be at least 6 characters long.">
+      <input matInput minlength="6" name="password"
+             ngModel placeholder="Your password" required type="password">
+      <mat-error >Not really good password</mat-error>
+    </mat-form-field>
+    <mat-form-field>
+      <input matInput [max]="maxDate" [matDatepicker]="picker" placeholder="Your birthday" ngModel name="datebirth" required>
+      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker #picker></mat-datepicker>
+    </mat-form-field>
+      <mat-checkbox ngModel name="agree" required>Agree to Terms and Coditions</mat-checkbox>
+    <button type="submit" mat-raised-button color="primary" [disabled]="f.invalid">Submit</button>
+  </form>
+</section>
