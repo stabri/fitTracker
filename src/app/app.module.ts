@@ -22,6 +22,7 @@ import {TrainingService} from "./training/training.service";
 import {AngularFireModule} from "@angular/fire";
 import {environment} from "../environments/environment";
 import {AngularFirestoreModule} from "@angular/fire/firestore";
+import {AngularFireAuthModule} from "@angular/fire/auth";
 
 @NgModule({
   declarations: [
@@ -46,6 +47,7 @@ import {AngularFirestoreModule} from "@angular/fire/firestore";
     FormsModule,
     AngularFireModule.initializeApp(environment.firebase),
     AngularFirestoreModule,
+    AngularFireAuthModule,
 
   ],
   // provide singleton service

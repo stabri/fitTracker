@@ -1,38 +1,60 @@
 import {User} from "./user.model";
 import {AuthDataModel} from "./auth-data.model";
-import {Subject} from "rxjs";
+import {Subject, Subscription} from "rxjs";
+import {AngularFireAuth} from "@angular/fire/auth";
+import {Injectable} from "@angular/core";
+import {Router} from "@angular/router";
+import {TrainingService} from "../training/training.service";
 
+@Injectable()
 export class AuthService {
   authChange = new Subject<boolean>();
-  private user: User;
+  private isAuthenticated: Boolean;
+
+  constructor(private router: Router,
+              private authService: AngularFireAuth,
+              private trainingService: TrainingService) {
+  }
+
+  initAuthListener(){
+    this.authService.authState.subscribe(user => {
+      if(user) {
+        this.isAuthenticated = true;
+        this.authChange.next(true);
+        this.router.navigate(['/training'])
+      }else {
+        this.authChange.next(false);
+        this.isAuthenticated = false;
+        this.router.navigate(['/login']);
+        this.trainingService.cancelSubs();
+      }
+    });
+  }
 
   registerUser(authData: AuthDataModel) {
-    this.user = {
-      email: authData.email,
-      userId: Math.round(Math.random() * 10000).toString(),
-  }
-  this.authChange.next(true);
+    this.authService.auth
+      .createUserWithEmailAndPassword(authData.email, authData.password).then(result => {
+      console.log(result);
+    }).catch(reason => {
+      console.log(reason)
+    });
   }
 
   login(authData: AuthDataModel) {
-    this.user = {
-      email: authData.email,
-      userId: Math.round(Math.random() * 10000).toString(),
-    }
-    this.authChange.next(true);
+    this.authService.auth.signInWithEmailAndPassword(authData.email, authData.password)
+      .then(result =>{
+        console.log(result);
+      })
+      .catch(reason => {
+        console.log(reason);
+      });
   }
 
   logout() {
-    this.user = null;
-    this.authChange.next(false);
-  }
-
-  getUser() {
-    // spread operator use to crate copy of original user
-    return {...this.user};
+    this.authService.auth.signOut();
   }
 
   isAuth() {
-    return this.user != null;
+    return this.isAuthenticated;
   }
 }

@@ -1,5 +1,5 @@
 import {ExercisesModel} from "./exercises.model";
-import {Subject} from "rxjs";
+import {Subject, Subscription} from "rxjs";
 import {map} from "rxjs/operators";
 import {AngularFirestore} from "@angular/fire/firestore";
 import {Injectable} from "@angular/core";
@@ -11,26 +11,27 @@ export class TrainingService {
   finishedExercisesChanged = new Subject<ExercisesModel[]>();
   private availableExercises: ExercisesModel[];
   private runningExercise: ExercisesModel;
+  private fbSubs: Subscription[] = [];
 
   constructor(private dbService: AngularFirestore) {
   }
 
   fetchAvailableExercises() {
-    this.dbService
+    this.fbSubs.push(this.dbService
       .collection('avaiableExercises')
       .snapshotChanges().pipe(map(docRef => {
-      return docRef.map(doc => {
-        return {
-          id: doc.payload.doc.id,
-          name: doc.payload.doc.get('name'),
-          duration: doc.payload.doc.get('duration'),
-          calories: doc.payload.doc.get('calories'),
-        }
-      })
-    })).subscribe(exercises => {
-      this.availableExercises = exercises;
-      this.exercisesChanged.next([...this.availableExercises]);
-    });
+        return docRef.map(doc => {
+          return {
+            id: doc.payload.doc.id,
+            name: doc.payload.doc.get('name'),
+            duration: doc.payload.doc.get('duration'),
+            calories: doc.payload.doc.get('calories'),
+          }
+        })
+      })).subscribe(exercises => {
+        this.availableExercises = exercises;
+        this.exercisesChanged.next([...this.availableExercises]);
+      }));
   }
 
   startExercise(selectedId: string) {
@@ -67,13 +68,18 @@ export class TrainingService {
   }
 
   fetchFinishedExercises() {
-    this.dbService.collection('finishedExercises').valueChanges()
+    this.fbSubs.push(this.dbService.collection('finishedExercises').valueChanges()
       .subscribe(
-        (exercises: ExercisesModel[]) =>
-          this.finishedExercisesChanged.next(exercises));
+        (exercises: ExercisesModel[]) => {
+          this.finishedExercisesChanged.next(exercises);
+        }));
   }
 
   addDataToDB(exercise: ExercisesModel) {
     this.dbService.collection('finishedExercises').add(exercise);
+  }
+
+  cancelSubs() {
+    this.fbSubs.forEach(sub => sub.unsubscribe());
   }
 }
