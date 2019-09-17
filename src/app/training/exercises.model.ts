@@ -5,5 +5,5 @@ export interface ExercisesModel {
   calories: number;
   // optional ?
   date?: Date;
-  state?: 'completed' | 'cancalled' | null;
+  state?: 'completed' | 'cancelled' | null;
 }

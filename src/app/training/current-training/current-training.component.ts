@@ -21,12 +21,14 @@ export class CurrentTrainingComponent implements OnInit {
   }
 
   startOrResumeTraining(){
+    const step = this.trainingService.getRunningExercise().duration * 10;
     this.timer = setInterval(()=>{
       this.progress = this.progress + 5;
       if(this.progress >= 100) {
+        this.trainingService.completeExercises();
         clearInterval(this.timer);
       }
-    },1000)
+    },step)
   }
 
   onStop() {
@@ -38,7 +40,7 @@ export class CurrentTrainingComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe(result => {
       if(result) {
-        this.trainingExit.emit();
+        this.trainingService.cancelExercise(this.progress)
       } else {
         this.startOrResumeTraining();
       }
